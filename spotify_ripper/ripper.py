@@ -12,7 +12,7 @@ from spotify_ripper.web import WebAPI
 from spotify_ripper.sync import Sync
 from spotify_ripper.eventloop import EventLoop
 from datetime import datetime
-from spotify_ripper.remove_all_from_playlist import get_playlist_tracks
+from spotify_ripper.get_playlist_tracks import get_playlist_tracks
 import os
 import sys
 import time
@@ -284,7 +284,6 @@ class Ripper(threading.Thread):
                                 Fore.YELLOW + "Skipping " +
                                 track.link.uri + Fore.RESET)
                             print(Fore.CYAN + self.audio_file + Fore.RESET)
-                            self.post.queue_remove_from_playlist(idx)
                             continue
 
                     self.session.player.load(track)
@@ -338,10 +337,6 @@ class Ripper(threading.Thread):
                     # update id3v2 with metadata and embed front cover image
                     set_metadata_tags(args, self.audio_file, idx, track, self)
 
-                    # make a note of the index and remove all the
-                    # tracks from the playlist when everything is done
-                    self.post.queue_remove_from_playlist(idx)
-
                     # finally log success
                     self.post.log_success(track)
 
@@ -361,9 +356,6 @@ class Ripper(threading.Thread):
 
             # create playlist wpl file if needed
             self.post.create_playlist_wpl(tracks)
-
-            # actually removing the tracks from playlist
-            self.post.remove_tracks_from_playlist()
 
             # remove libspotify's offline storage cache
             self.post.remove_offline_cache()
